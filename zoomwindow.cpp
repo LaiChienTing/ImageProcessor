@@ -142,12 +142,12 @@ void ZoomWindow::clearDrawing()
 // 事件過濾器：處理 imageLabel 上的滑鼠事件
 bool ZoomWindow::eventFilter(QObject *watched, QEvent *event)
 {
-    if (watched == imageLabel)
+    if (watched == imageLabel && event)
     {
         if (event->type() == QEvent::MouseButtonPress)
         {
             QMouseEvent *mouseEvent = static_cast<QMouseEvent*>(event);
-            if (mouseEvent->button() == Qt::LeftButton)
+            if (mouseEvent && mouseEvent->button() == Qt::LeftButton)
             {
                 lastPoint = mouseEvent->pos();
                 drawing = true;
@@ -157,7 +157,7 @@ bool ZoomWindow::eventFilter(QObject *watched, QEvent *event)
         else if (event->type() == QEvent::MouseMove)
         {
             QMouseEvent *mouseEvent = static_cast<QMouseEvent*>(event);
-            if ((mouseEvent->buttons() & Qt::LeftButton) && drawing)
+            if (mouseEvent && (mouseEvent->buttons() & Qt::LeftButton) && drawing)
             {
                 drawLineTo(mouseEvent->pos());
                 return true;
@@ -166,7 +166,7 @@ bool ZoomWindow::eventFilter(QObject *watched, QEvent *event)
         else if (event->type() == QEvent::MouseButtonRelease)
         {
             QMouseEvent *mouseEvent = static_cast<QMouseEvent*>(event);
-            if (mouseEvent->button() == Qt::LeftButton && drawing)
+            if (mouseEvent && mouseEvent->button() == Qt::LeftButton && drawing)
             {
                 drawLineTo(mouseEvent->pos());
                 drawing = false;

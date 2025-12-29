@@ -320,7 +320,7 @@ void ImageProcessor::openZoomWindow()
 // 將 label 座標轉換為實際圖片座標
 QPoint ImageProcessor::labelToImageCoords(const QPoint &labelPos)
 {
-    if (img.isNull() || imgWin->pixmap() == nullptr)
+    if (img.isNull() || !imgWin || imgWin->pixmap() == nullptr)
         return labelPos;
     
     // 取得 label 和圖片的尺寸
