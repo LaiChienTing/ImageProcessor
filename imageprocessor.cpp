@@ -175,16 +175,16 @@ void ImageProcessor::showGeometryTransform()
 
 void ImageProcessor::mouseDoubleClickEvent(QMouseEvent * event)
 {
-    QString str = "(" + QString::number(event->x()) + ", " +
-                  QString::number(event->y()) + ")";
+    QString str = "(" + QString::number(qRound(event->position().x())) + ", " +
+                  QString::number(qRound(event->position().y())) + ")";
     statusBar()->showMessage(QStringLiteral("雙擊")+str);
     qDebug()<< "雙擊";
 }
 
 void ImageProcessor::mouseMoveEvent(QMouseEvent * event)
 {
-    int x = event->x();
-    int y = event->y();
+    int x = qRound(event->position().x());
+    int y = qRound(event->position().y());
     QString str = "(" + QString::number(x) + ", " +
                   QString::number(y) + ")";
     if (!img.isNull() && x >= 0 && x < img.width() && y >= 0 && y < img.height())
@@ -206,8 +206,8 @@ void ImageProcessor::mouseMoveEvent(QMouseEvent * event)
 
 void ImageProcessor::mousePressEvent(QMouseEvent * event)
 {
-    QString str = "(" + QString::number(event->x()) + ", " +
-                  QString::number(event->y()) + ")";
+    QString str = "(" + QString::number(qRound(event->position().x())) + ", " +
+                  QString::number(qRound(event->position().y())) + ")";
     if (event->button() == Qt::LeftButton)
     {
         statusBar()->showMessage(QStringLiteral("左鍵:") + str);
@@ -236,8 +236,8 @@ void ImageProcessor::mousePressEvent(QMouseEvent * event)
 
 void ImageProcessor::mouseReleaseEvent(QMouseEvent * event)
 {
-    QString str = "(" + QString::number(event->x()) + ", " +
-                  QString::number(event->y()) + ")";
+    QString str = "(" + QString::number(qRound(event->position().x())) + ", " +
+                  QString::number(qRound(event->position().y())) + ")";
     statusBar()->showMessage(QStringLiteral("釋放:")+str);
     qDebug()<< "釋放";
     
@@ -320,7 +320,7 @@ void ImageProcessor::openZoomWindow()
 // 將 label 座標轉換為實際圖片座標
 QPoint ImageProcessor::labelToImageCoords(const QPoint &labelPos)
 {
-    if (img.isNull() || !imgWin || imgWin->pixmap() == nullptr)
+    if (img.isNull() || !imgWin || imgWin->pixmap().isNull())
         return labelPos;
     
     // 取得 label 和圖片的尺寸

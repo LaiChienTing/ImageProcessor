@@ -11,6 +11,7 @@
 #include <QToolBar>
 #include <QAction>
 #include <QColorDialog>
+#include <QStatusBar>
 
 // 放大視窗類別：用於顯示選取區域的放大圖片，並提供畫筆和存檔功能
 class ZoomWindow : public QMainWindow
