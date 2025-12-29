@@ -24,6 +24,17 @@ ImageProcessor::ImageProcessor(QWidget *parent)
     createActions();
     createMenus();
     createToolBars();
+    statusLabel = new QLabel;
+    statusLabel->setText(QStringLiteral("指標位置"));
+    statusLabel->setFixedWidth(100);
+    MousePosLabel = new QLabel;
+    MousePosLabel->setText(tr(" "));
+    MousePosLabel->setFixedWidth(100);
+    statusBar()->addPermanentWidget(statusLabel);
+    statusBar()->addPermanentWidget(MousePosLabel);
+    setMouseTracking(true);
+    imgWin->setMouseTracking(true);
+    central->setMouseTracking(true);
 }
 
 ImageProcessor::~ImageProcessor()
@@ -157,4 +168,48 @@ void ImageProcessor::showGeometryTransform()
         gWin->inWin->setPixmap(QPixmap::fromImage(gWin->srcImg));
         gWin->show();
     }
+}
+
+void ImageProcessor::mouseDoubleClickEvent(QMouseEvent * event)
+{
+    QString str = "(" + QString::number(event->x()) + ", " +
+                  QString::number(event->y()) + ")";
+    statusBar()->showMessage(QStringLiteral("雙擊")+str);
+    qDebug()<< "雙擊";
+}
+
+void ImageProcessor::mouseMoveEvent(QMouseEvent * event)
+{
+    int x = event->x();
+    int y = event->y();
+    QString str = "(" + QString::number(x) + ", " +
+                  QString::number(y) + ")";
+    if (!img.isNull() && x >= 0 && x < img.width() && y >= 0 && y < img.height())
+    {
+        int gray = qGray(img.pixel(x, y));
+        str += " = " + QString::number(gray);
+    }
+
+    MousePosLabel->setText(str);
+}
+
+void ImageProcessor::mousePressEvent(QMouseEvent * event)
+{
+    QString str = "(" + QString::number(event->x()) + ", " +
+                  QString::number(event->y()) + ")";
+    if (event->button() == Qt::LeftButton)
+        statusBar()->showMessage(QStringLiteral("左鍵:") + str);
+    else if (event->button() == Qt::RightButton)
+        statusBar()->showMessage(QStringLiteral("右鍵:") + str);
+    else if (event->button() == Qt::MiddleButton)
+        statusBar()->showMessage(QStringLiteral("中鍵:") + str);
+    qDebug()<< "按壓";
+}
+
+void ImageProcessor::mouseReleaseEvent(QMouseEvent * event)
+{
+    QString str = "(" + QString::number(event->x()) + ", " +
+                  QString::number(event->y()) + ")";
+    statusBar()->showMessage(QStringLiteral("釋放:")+str);
+    qDebug()<< "釋放";
 }

@@ -7,6 +7,8 @@
 #include <QToolBar>
 #include <QImage>
 #include <QLabel>
+#include <QMouseEvent>
+#include <QStatusBar>
 #include "imagetransform.h"
 
 class ImageProcessor : public QMainWindow
@@ -21,6 +23,12 @@ public:
     void createToolBars();
     void loadFile(QString filename);
     void loadImage(const QImage &image);
+
+protected:
+    void mouseDoubleClickEvent(QMouseEvent * event);
+    void mouseMoveEvent(QMouseEvent * event);
+    void mousePressEvent(QMouseEvent * event);
+    void mouseReleaseEvent(QMouseEvent * event);
 
 private slots:
     void showOpenFile();
@@ -40,5 +48,7 @@ private:
     QAction   *zoomOutAction;
     double scaleFactor = 1.0;
     QAction   *geometryAction;
+    QLabel    *statusLabel;
+    QLabel    *MousePosLabel;
 };
 #endif // IMAGEPROCESSOR_H
