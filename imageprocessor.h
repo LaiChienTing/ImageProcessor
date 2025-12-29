@@ -9,9 +9,10 @@
 #include <QLabel>
 #include <QMouseEvent>
 #include <QStatusBar>
-#include <QInputDialog>
 #include "imagetransform.h"
-#include "zoomwindow.h"
+
+// 前置宣告，避免循環包含
+class ZoomWindow;
 
 class ImageProcessor : public QMainWindow
 {

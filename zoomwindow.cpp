@@ -7,6 +7,7 @@
 #include <QScrollArea>
 #include <QLabel>
 #include <QToolButton>
+#include <QEvent>
 
 // 建構子：初始化放大視窗
 ZoomWindow::ZoomWindow(const QImage &sourceImage, const QRect &selectedRect, double zoomFactor, QWidget *parent)
@@ -30,6 +31,7 @@ ZoomWindow::ZoomWindow(const QImage &sourceImage, const QRect &selectedRect, dou
     imageLabel = new QLabel;
     imageLabel->setPixmap(QPixmap::fromImage(drawingImage));
     imageLabel->setMouseTracking(true);
+    imageLabel->installEventFilter(this);  // 安裝事件過濾器以捕捉滑鼠事件
     scrollArea->setWidget(imageLabel);
     scrollArea->setWidgetResizable(false);
     
@@ -140,46 +142,61 @@ void ZoomWindow::clearDrawing()
 // 滑鼠按下事件：開始繪圖
 void ZoomWindow::mousePressEvent(QMouseEvent *event)
 {
-    if (event->button() == Qt::LeftButton)
-    {
-        // 轉換座標到 imageLabel 的相對位置
-        QPoint globalPos = event->globalPos();
-        QPoint labelPos = imageLabel->mapFromGlobal(globalPos);
-        
-        // 檢查是否在圖片範圍內
-        if (imageLabel->rect().contains(labelPos))
-        {
-            lastPoint = labelPos;
-            drawing = true;
-        }
-    }
+    // 這個方法保留用於主視窗級別的事件處理
+    QMainWindow::mousePressEvent(event);
 }
 
 // 滑鼠移動事件：繪製線條
 void ZoomWindow::mouseMoveEvent(QMouseEvent *event)
 {
-    if ((event->buttons() & Qt::LeftButton) && drawing)
-    {
-        // 轉換座標到 imageLabel 的相對位置
-        QPoint globalPos = event->globalPos();
-        QPoint labelPos = imageLabel->mapFromGlobal(globalPos);
-        
-        drawLineTo(labelPos);
-    }
+    // 這個方法保留用於主視窗級別的事件處理
+    QMainWindow::mouseMoveEvent(event);
 }
 
 // 滑鼠釋放事件：結束繪圖
 void ZoomWindow::mouseReleaseEvent(QMouseEvent *event)
 {
-    if (event->button() == Qt::LeftButton && drawing)
+    // 這個方法保留用於主視窗級別的事件處理
+    QMainWindow::mouseReleaseEvent(event);
+}
+
+// 事件過濾器：處理 imageLabel 上的滑鼠事件
+bool ZoomWindow::eventFilter(QObject *watched, QEvent *event)
+{
+    if (watched == imageLabel)
     {
-        // 轉換座標到 imageLabel 的相對位置
-        QPoint globalPos = event->globalPos();
-        QPoint labelPos = imageLabel->mapFromGlobal(globalPos);
-        
-        drawLineTo(labelPos);
-        drawing = false;
+        if (event->type() == QEvent::MouseButtonPress)
+        {
+            QMouseEvent *mouseEvent = static_cast<QMouseEvent*>(event);
+            if (mouseEvent->button() == Qt::LeftButton)
+            {
+                lastPoint = mouseEvent->pos();
+                drawing = true;
+                return true;
+            }
+        }
+        else if (event->type() == QEvent::MouseMove)
+        {
+            QMouseEvent *mouseEvent = static_cast<QMouseEvent*>(event);
+            if ((mouseEvent->buttons() & Qt::LeftButton) && drawing)
+            {
+                drawLineTo(mouseEvent->pos());
+                return true;
+            }
+        }
+        else if (event->type() == QEvent::MouseButtonRelease)
+        {
+            QMouseEvent *mouseEvent = static_cast<QMouseEvent*>(event);
+            if (mouseEvent->button() == Qt::LeftButton && drawing)
+            {
+                drawLineTo(mouseEvent->pos());
+                drawing = false;
+                return true;
+            }
+        }
     }
+    
+    return QMainWindow::eventFilter(watched, event);
 }
 
 // 繪製線條從上一個點到當前點

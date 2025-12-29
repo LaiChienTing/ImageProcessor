@@ -26,6 +26,7 @@ protected:
     void mousePressEvent(QMouseEvent *event);
     void mouseMoveEvent(QMouseEvent *event);
     void mouseReleaseEvent(QMouseEvent *event);
+    bool eventFilter(QObject *watched, QEvent *event);  // 事件過濾器
 
 private slots:
     void saveImage();           // 存檔功能
