@@ -22,10 +22,6 @@ public:
     ~ZoomWindow();
 
 protected:
-    // 滑鼠事件處理：用於畫筆功能
-    void mousePressEvent(QMouseEvent *event);
-    void mouseMoveEvent(QMouseEvent *event);
-    void mouseReleaseEvent(QMouseEvent *event);
     bool eventFilter(QObject *watched, QEvent *event);  // 事件過濾器
 
 private slots:

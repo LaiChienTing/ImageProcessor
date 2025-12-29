@@ -61,5 +61,8 @@ private:
     QPoint selectionStart;      // 選取起始點
     QPoint selectionEnd;        // 選取結束點
     QRect selectionRect;        // 選取的矩形區域
+    
+    // 輔助方法：將 label 座標轉換為實際圖片座標
+    QPoint labelToImageCoords(const QPoint &labelPos);
 };
 #endif // IMAGEPROCESSOR_H

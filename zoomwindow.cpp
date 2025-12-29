@@ -139,27 +139,6 @@ void ZoomWindow::clearDrawing()
     statusBar()->showMessage(QStringLiteral("繪圖已清除"), 2000);
 }
 
-// 滑鼠按下事件：開始繪圖
-void ZoomWindow::mousePressEvent(QMouseEvent *event)
-{
-    // 這個方法保留用於主視窗級別的事件處理
-    QMainWindow::mousePressEvent(event);
-}
-
-// 滑鼠移動事件：繪製線條
-void ZoomWindow::mouseMoveEvent(QMouseEvent *event)
-{
-    // 這個方法保留用於主視窗級別的事件處理
-    QMainWindow::mouseMoveEvent(event);
-}
-
-// 滑鼠釋放事件：結束繪圖
-void ZoomWindow::mouseReleaseEvent(QMouseEvent *event)
-{
-    // 這個方法保留用於主視窗級別的事件處理
-    QMainWindow::mouseReleaseEvent(event);
-}
-
 // 事件過濾器：處理 imageLabel 上的滑鼠事件
 bool ZoomWindow::eventFilter(QObject *watched, QEvent *event)
 {

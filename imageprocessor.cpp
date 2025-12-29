@@ -198,8 +198,8 @@ void ImageProcessor::mouseMoveEvent(QMouseEvent * event)
     // 更新選取區域
     if (isSelecting)
     {
-        QPoint imgPos = imgWin->mapFrom(this, event->pos());
-        selectionEnd = imgPos;
+        QPoint labelPos = imgWin->mapFrom(this, event->pos());
+        selectionEnd = labelPos;
         update();  // 觸發重繪以顯示選取框
     }
 }
@@ -215,13 +215,14 @@ void ImageProcessor::mousePressEvent(QMouseEvent * event)
         // 開始區域選取（需按住 Ctrl 鍵）
         if (event->modifiers() & Qt::ControlModifier && !img.isNull())
         {
-            // 轉換座標到圖片座標
-            QPoint imgPos = imgWin->mapFrom(this, event->pos());
-            if (imgWin->rect().contains(imgPos))
+            // 轉換座標到 label 座標
+            QPoint labelPos = imgWin->mapFrom(this, event->pos());
+            if (imgWin->rect().contains(labelPos))
             {
                 isSelecting = true;
-                selectionStart = imgPos;
-                selectionEnd = imgPos;
+                // 儲存 label 座標用於繪製選取框
+                selectionStart = labelPos;
+                selectionEnd = labelPos;
                 statusBar()->showMessage(QStringLiteral("開始選取區域: ") + str);
             }
         }
@@ -245,11 +246,15 @@ void ImageProcessor::mouseReleaseEvent(QMouseEvent * event)
     {
         isSelecting = false;
         
-        // 建立選取矩形
-        QPoint topLeft(qMin(selectionStart.x(), selectionEnd.x()),
-                      qMin(selectionStart.y(), selectionEnd.y()));
-        QPoint bottomRight(qMax(selectionStart.x(), selectionEnd.x()),
-                          qMax(selectionStart.y(), selectionEnd.y()));
+        // 將 label 座標轉換為實際圖片座標
+        QPoint imgStart = labelToImageCoords(selectionStart);
+        QPoint imgEnd = labelToImageCoords(selectionEnd);
+        
+        // 建立選取矩形（在圖片座標系統中）
+        QPoint topLeft(qMin(imgStart.x(), imgEnd.x()),
+                      qMin(imgStart.y(), imgEnd.y()));
+        QPoint bottomRight(qMax(imgStart.x(), imgEnd.x()),
+                          qMax(imgStart.y(), imgEnd.y()));
         
         selectionRect = QRect(topLeft, bottomRight);
         
@@ -311,4 +316,31 @@ void ImageProcessor::openZoomWindow()
         zoomWin->show();
     }
 }
+
+// 將 label 座標轉換為實際圖片座標
+QPoint ImageProcessor::labelToImageCoords(const QPoint &labelPos)
+{
+    if (img.isNull() || imgWin->pixmap() == nullptr)
+        return labelPos;
+    
+    // 取得 label 和圖片的尺寸
+    QSize labelSize = imgWin->size();
+    QSize imgSize = img.size();
+    
+    // 因為使用 setScaledContents(true)，圖片會縮放以填滿 label
+    // 計算縮放比例
+    double scaleX = static_cast<double>(imgSize.width()) / labelSize.width();
+    double scaleY = static_cast<double>(imgSize.height()) / labelSize.height();
+    
+    // 轉換座標
+    int imgX = static_cast<int>(labelPos.x() * scaleX);
+    int imgY = static_cast<int>(labelPos.y() * scaleY);
+    
+    // 確保座標在圖片範圍內
+    imgX = qBound(0, imgX, img.width() - 1);
+    imgY = qBound(0, imgY, img.height() - 1);
+    
+    return QPoint(imgX, imgY);
+}
+
 
