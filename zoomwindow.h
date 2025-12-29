@@ -22,7 +22,7 @@ public:
     ~ZoomWindow();
 
 protected:
-    bool eventFilter(QObject *watched, QEvent *event);  // 事件過濾器
+    bool eventFilter(QObject *watched, QEvent *event) override;  // 事件過濾器
 
 private slots:
     void saveImage();           // 存檔功能

@@ -59,7 +59,7 @@ void ImageProcessor::createActions()
 
     geometryAction = new QAction(QStringLiteral("幾何轉換"), this);
     geometryAction->setShortcut(tr("Ctrl+G"));
-    geometryAction->setStatusTip(QStringLiteral("幾何幾何轉換"));
+    geometryAction->setStatusTip(QStringLiteral("幾何轉換"));
     connect(geometryAction, SIGNAL(triggered()), this, SLOT(showGeometryTransform()));
     connect(exitAction, SIGNAL(triggered()), gWin, SLOT(close()));
 
@@ -82,7 +82,7 @@ void ImageProcessor::createActions()
         resultWin->loadImage(result);
     });
 
-    zoomOutAction = new QAction(QStringLiteral("縮小(&-)"), this);\
+    zoomOutAction = new QAction(QStringLiteral("縮小(&-)"), this);
     zoomOutAction->setShortcut(tr("Ctrl+-"));
     connect(zoomOutAction, &QAction::triggered, this, [=]() {
 
