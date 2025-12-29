@@ -4,10 +4,13 @@
 #include <QFileDialog>
 #include <QDebug>
 #include <QPixmap>
+#include <QPainter>
+#include <QInputDialog>
 #include "imagetransform.h"
+#include "zoomwindow.h"
 
 ImageProcessor::ImageProcessor(QWidget *parent)
-    : QMainWindow(parent)
+    : QMainWindow(parent), isSelecting(false)  // 初始化區域選取狀態
 {
     setWindowTitle(QStringLiteral("影像處理"));
     central = new QWidget();
@@ -191,6 +194,14 @@ void ImageProcessor::mouseMoveEvent(QMouseEvent * event)
     }
 
     MousePosLabel->setText(str);
+    
+    // 更新選取區域
+    if (isSelecting)
+    {
+        QPoint imgPos = imgWin->mapFrom(this, event->pos());
+        selectionEnd = imgPos;
+        update();  // 觸發重繪以顯示選取框
+    }
 }
 
 void ImageProcessor::mousePressEvent(QMouseEvent * event)
@@ -198,7 +209,23 @@ void ImageProcessor::mousePressEvent(QMouseEvent * event)
     QString str = "(" + QString::number(event->x()) + ", " +
                   QString::number(event->y()) + ")";
     if (event->button() == Qt::LeftButton)
+    {
         statusBar()->showMessage(QStringLiteral("左鍵:") + str);
+        
+        // 開始區域選取（需按住 Ctrl 鍵）
+        if (event->modifiers() & Qt::ControlModifier && !img.isNull())
+        {
+            // 轉換座標到圖片座標
+            QPoint imgPos = imgWin->mapFrom(this, event->pos());
+            if (imgWin->rect().contains(imgPos))
+            {
+                isSelecting = true;
+                selectionStart = imgPos;
+                selectionEnd = imgPos;
+                statusBar()->showMessage(QStringLiteral("開始選取區域: ") + str);
+            }
+        }
+    }
     else if (event->button() == Qt::RightButton)
         statusBar()->showMessage(QStringLiteral("右鍵:") + str);
     else if (event->button() == Qt::MiddleButton)
@@ -212,4 +239,76 @@ void ImageProcessor::mouseReleaseEvent(QMouseEvent * event)
                   QString::number(event->y()) + ")";
     statusBar()->showMessage(QStringLiteral("釋放:")+str);
     qDebug()<< "釋放";
+    
+    // 完成區域選取
+    if (isSelecting && event->button() == Qt::LeftButton)
+    {
+        isSelecting = false;
+        
+        // 建立選取矩形
+        QPoint topLeft(qMin(selectionStart.x(), selectionEnd.x()),
+                      qMin(selectionStart.y(), selectionEnd.y()));
+        QPoint bottomRight(qMax(selectionStart.x(), selectionEnd.x()),
+                          qMax(selectionStart.y(), selectionEnd.y()));
+        
+        selectionRect = QRect(topLeft, bottomRight);
+        
+        // 確保選取區域有效且在圖片範圍內
+        if (selectionRect.width() > 10 && selectionRect.height() > 10)
+        {
+            // 限制在圖片範圍內
+            selectionRect = selectionRect.intersected(QRect(0, 0, img.width(), img.height()));
+            
+            if (!selectionRect.isEmpty())
+            {
+                statusBar()->showMessage(QStringLiteral("區域已選取，正在開啟放大視窗..."), 2000);
+                openZoomWindow();
+            }
+        }
+        update();  // 清除選取框
+    }
 }
+
+// 繪製選取框
+void ImageProcessor::paintEvent(QPaintEvent *event)
+{
+    QMainWindow::paintEvent(event);
+    
+    // 繪製選取框
+    if (isSelecting)
+    {
+        QPainter painter(this);
+        painter.setPen(QPen(Qt::blue, 2, Qt::DashLine));
+        
+        QPoint start = imgWin->mapTo(this, selectionStart);
+        QPoint end = imgWin->mapTo(this, selectionEnd);
+        
+        QRect rect(start, end);
+        painter.drawRect(rect.normalized());
+    }
+}
+
+// 開啟放大視窗
+void ImageProcessor::openZoomWindow()
+{
+    if (img.isNull() || selectionRect.isEmpty())
+    {
+        return;
+    }
+    
+    // 詢問使用者放大倍率
+    bool ok;
+    double zoomFactor = QInputDialog::getDouble(this,
+                                                QStringLiteral("設定放大倍率"),
+                                                QStringLiteral("請輸入放大倍率 (1.0 - 10.0):"),
+                                                2.0, 1.0, 10.0, 1, &ok);
+    
+    if (ok)
+    {
+        // 建立並顯示放大視窗
+        ZoomWindow *zoomWin = new ZoomWindow(img, selectionRect, zoomFactor);
+        zoomWin->setAttribute(Qt::WA_DeleteOnClose);  // 關閉時自動刪除
+        zoomWin->show();
+    }
+}
+

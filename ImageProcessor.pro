@@ -11,11 +11,13 @@ CONFIG += c++17
 SOURCES += \
     imagetransform.cpp \
     main.cpp \
-    imageprocessor.cpp
+    imageprocessor.cpp \
+    zoomwindow.cpp
 
 HEADERS += \
     imageprocessor.h \
-    imagetransform.h
+    imagetransform.h \
+    zoomwindow.h
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

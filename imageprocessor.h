@@ -9,7 +9,9 @@
 #include <QLabel>
 #include <QMouseEvent>
 #include <QStatusBar>
+#include <QInputDialog>
 #include "imagetransform.h"
+#include "zoomwindow.h"
 
 class ImageProcessor : public QMainWindow
 {
@@ -29,10 +31,12 @@ protected:
     void mouseMoveEvent(QMouseEvent * event);
     void mousePressEvent(QMouseEvent * event);
     void mouseReleaseEvent(QMouseEvent * event);
+    void paintEvent(QPaintEvent *event);  // 繪製選取框
 
 private slots:
     void showOpenFile();
     void showGeometryTransform();
+    void openZoomWindow();  // 開啟放大視窗
 
 private:
     ImageTransform *gWin;
@@ -50,5 +54,11 @@ private:
     QAction   *geometryAction;
     QLabel    *statusLabel;
     QLabel    *MousePosLabel;
+    
+    // 區域選取相關變數
+    bool isSelecting;           // 是否正在選取區域
+    QPoint selectionStart;      // 選取起始點
+    QPoint selectionEnd;        // 選取結束點
+    QRect selectionRect;        // 選取的矩形區域
 };
 #endif // IMAGEPROCESSOR_H
